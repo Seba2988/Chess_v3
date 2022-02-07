@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Chess_v3
 {
@@ -185,7 +181,7 @@ namespace Chess_v3
             Console.WriteLine("Welcome to the game!\nPlayer one=W, Player two=B");
             Player players = new Player();
             print();
-            
+
             while (!isDraw)
             {
                 Console.WriteLine();
@@ -286,27 +282,24 @@ namespace Chess_v3
                 return false;
             if (destinationPiece is Empty || destinationPiece.pieceIsWhite() != pieceIsWhite())
             {
+
                 if (!hasMoved)
                 {
-                    if(destinationPiece.getColumn() - getColumn() > 1 && grid[getRow(), getColumn() + 3] is Rook)
+                    if (destinationPiece.getColumn() - getColumn() > 1 && grid[getRow(), getColumn() + 3] is Rook)
                     {
                         if (((Rook)grid[getRow(), getColumn() + 3]).getHasMoved())
                             return false;
                         else
-                                if (grid[getRow(), getColumn() + 1] is Empty)
+                        if (grid[getRow(), getColumn() + 1] is Empty)
                             return true;
-                        else
-                            return false;
                     }
-                    if(getColumn()-destinationPiece.getColumn() > 1 && grid[getRow(), getColumn() - 4] is Rook)
+                    if (getColumn() - destinationPiece.getColumn() > 1 && grid[getRow(), getColumn() - 4] is Rook)
                     {
                         if (((Rook)grid[getRow(), getColumn() - 4]).getHasMoved())
                             return false;
                         else
-                                if (grid[getRow(), getColumn() -1] is Empty && grid[getRow(), getColumn() -2] is Empty)
+                        if (grid[getRow(), getColumn() - 1] is Empty && grid[getRow(), getColumn() - 2] is Empty)
                             return true;
-                        else
-                            return false;
                     }
                 }
                 return true;
@@ -553,42 +546,70 @@ namespace Chess_v3
         }
         public override bool isValidMove(Piece destinationPiece, bool playerTurn, Piece[,] grid)
         {
-            if(!hasMoved)
+            if (!hasMoved)
             {
-                if(playerTurn && destinationPiece is Empty)
+                if (playerTurn && destinationPiece is Empty)
                 {
                     if (destinationPiece.getRow() - getRow() > 1 && destinationPiece.getColumn() == getColumn() && grid[getRow() + 1, getColumn()] is Empty)
                     {
                         return true;
                     }
-                    else
-                    if (destinationPiece.getRow() - getRow() == 1 && destinationPiece.getColumn() == getColumn())
-                        return true;
-                    else
-                        return false;
                 }
                 else
-                if(!playerTurn && destinationPiece is Empty)
+                if (!playerTurn && destinationPiece is Empty)
                 {
                     if (getRow() - destinationPiece.getRow() > 1 && destinationPiece.getColumn() == getColumn() && grid[getRow() - 1, getColumn()] is Empty)
                     {
                         return true;
                     }
-                    else
-                        if (getRow() - destinationPiece.getRow() == 1 && destinationPiece.getColumn() == getColumn())
-                        return true;
-                    else
-                        return false;
                 }
             }
-            else
+            if (destinationPiece is Empty)
             {
+                if (playerTurn)
+                {
+                    if (destinationPiece.getRow() - getRow() == 1 && destinationPiece.getColumn() == getColumn())
+                        return true;
 
+                    if (((destinationPiece.getRow() - getRow() == 1 && destinationPiece.getColumn() - getColumn() == 1) || (destinationPiece.getRow() - getRow() == 1 && getColumn() - destinationPiece.getColumn() == 1)) && grid[destinationPiece.getRow() - 1, destinationPiece.getColumn()] is Pawn)
+                    {
+                        if (((Pawn)grid[destinationPiece.getRow() - 1, destinationPiece.getColumn()]).getIsEnPassant())
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (getRow() - destinationPiece.getRow() == 1 && destinationPiece.getColumn() == getColumn())
+                        return true;
+                    if (((getRow() - destinationPiece.getRow() == 1 && destinationPiece.getColumn() - getColumn() == 1) || (getRow() - destinationPiece.getRow() == 1 && getColumn() - destinationPiece.getColumn() == 1)) && grid[destinationPiece.getRow() + 1, destinationPiece.getColumn()] is Pawn)
+                    {
+                        if (((Pawn)grid[destinationPiece.getRow() + 1, destinationPiece.getColumn()]).getIsEnPassant())
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
-
-
-
-            return true;
+            if (destinationPiece.pieceIsWhite() != playerTurn && !(destinationPiece is Empty))
+            {
+                if (playerTurn)
+                {
+                    if ((destinationPiece.getRow() - getRow() == 1 && destinationPiece.getColumn() - getColumn() == 1) || (destinationPiece.getRow() - getRow() == 1 && getColumn() - destinationPiece.getColumn() == 1))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if ((getRow() - destinationPiece.getRow() == 1 && destinationPiece.getColumn() - getColumn() == 1) || (getRow() - destinationPiece.getRow() == 1 && getColumn() - destinationPiece.getColumn() == 1))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
         public void setHasMoved()
         {
@@ -609,7 +630,7 @@ namespace Chess_v3
         public Piece promote(bool playerTurn)
         {
             bool validInput = false;
-            char[] validChoices = {'Q', 'R', 'N', 'B'};
+            char[] validChoices = { 'Q', 'R', 'N', 'B' };
 
             Console.WriteLine("The pawn is promoted, please select the new piece and press ENTER");
             string input = Console.ReadLine();
@@ -635,7 +656,7 @@ namespace Chess_v3
                 }
             }
             Piece pawnPromoted = new Piece(0, 0, true);
-            switch(input)
+            switch (input)
             {
                 case "Q":
                     pawnPromoted = new Queen(getRow(), getColumn(), playerTurn);
