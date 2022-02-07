@@ -363,9 +363,24 @@ namespace Chess_v3
                 return false;
             if (destinationPiece is Empty || destinationPiece.pieceIsWhite() != pieceIsWhite())
             {
+                if (getRow() - destinationPiece.getRow() == 2 && destinationPiece.getColumn() - getColumn() == 1)
+                    return true;
+                if (getRow() - destinationPiece.getRow() == 2 && getColumn() - destinationPiece.getColumn() == 1)
+                    return true;
+                if (getRow() - destinationPiece.getRow() == 1 && destinationPiece.getColumn() - getColumn() == 2)
+                    return true;
+                if (getRow() - destinationPiece.getRow() == 1 && getColumn() - destinationPiece.getColumn() == 2)
+                    return true;
                 if (destinationPiece.getRow() - getRow() == 2 && destinationPiece.getColumn() - getColumn() == 1)
                     return true;
-                if 
+                if (destinationPiece.getRow() - getRow() == 2 && getColumn() - destinationPiece.getColumn() == 1)
+                    return true;
+                if (destinationPiece.getRow() - getRow() == 1 && destinationPiece.getColumn() - getColumn() == 2)
+                    return true;
+                if (destinationPiece.getRow() - getRow() == 1 && getColumn() - destinationPiece.getColumn() == 2)
+                    return true;
+
+                return false;
             }
             return false;
         }
