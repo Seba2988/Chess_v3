@@ -282,7 +282,23 @@ namespace Chess_v3
                 return false;
             if (destinationPiece is Empty || destinationPiece.pieceIsWhite() != pieceIsWhite())
             {
-
+                if (getRow() - destinationPiece.getRow() == 1 && getColumn() - destinationPiece.getColumn() == 1)
+                    return true;
+                if (getRow() - destinationPiece.getRow() == 1 && getColumn() == destinationPiece.getColumn())
+                    return true;
+                if (getRow() - destinationPiece.getRow() == 1 && destinationPiece.getColumn() - getColumn() == 1)
+                    return true;
+                if (getRow() == destinationPiece.getRow() && destinationPiece.getColumn() - getColumn() == 1)
+                    return true;
+                if (destinationPiece.getRow() - getRow() == 1 && destinationPiece.getColumn() - getColumn() == 1)
+                    return true;
+                if (destinationPiece.getRow() - getRow() == 1 && destinationPiece.getColumn() == getColumn())
+                    return true;
+                if (destinationPiece.getRow() - getRow() == 1 && getColumn() - destinationPiece.getColumn() == 1)
+                    return true;
+                if (getRow() == destinationPiece.getRow() && getColumn() - destinationPiece.getColumn() == 1)
+                    return true;
+                
                 if (!hasMoved)
                 {
                     if (destinationPiece.getColumn() - getColumn() > 1 && grid[getRow(), getColumn() + 3] is Rook)
@@ -302,7 +318,6 @@ namespace Chess_v3
                             return true;
                     }
                 }
-                return true;
             }
             return false;
         }
