@@ -112,8 +112,12 @@ namespace Chess_v3
         int whiteKingColumn = 4;
         int blackKingRow = 7;
         int blackKingColumn = 4;
+        int boardsCount = 0;
+        int sameBoard = 0;
+        ChessGame[] boardsToCompare = new ChessGame[50];
         Piece partialPieceFrom = new Piece(0, 0, true);
         Piece partialPieceTo = new Piece(0, 0, true);
+
         public ChessGame()
         {
             grid = new Piece[8, 8]
@@ -192,7 +196,7 @@ namespace Chess_v3
             Player players = new Player();
             print();
 
-            while (!isDraw())
+            while (!isDraw(players.getPlayerTurn()))
             {
                 Console.WriteLine();
                 Console.WriteLine((players.getPlayerTurn() ? "White" : "Black") + " player turn");
@@ -273,11 +277,11 @@ namespace Chess_v3
         {
             return false;
         }
-        bool isDraw()
+        bool isDraw(bool playerTurn)
         {
             if (movesWhithoutCapturesOrPawns == 50)
                 return true;
-            if (threeFoldRepetition())
+            if (threeFoldRepetition(playerTurn))
                 return true;
             if (isStalemate())
                 return true;
@@ -293,8 +297,43 @@ namespace Chess_v3
         {
             return false;
         }
-        bool threeFoldRepetition()
+        bool threeFoldRepetition(bool playerTurn)
         {
+            Piece[,] boardToAdd = new Piece[8, 8];
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                {
+                    boardToAdd[i, j] = grid[i, j].copy(i, j, grid[i, j].pieceIsWhite());
+                }
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                {
+                    boardsToCompare[boardsCount] = new ChessGame();
+                    boardsToCompare[boardsCount].grid[i, j] = boardToAdd[i, j];
+                }
+            for (int i = 0; i <= boardsCount && sameBoard != 3; i++)
+            {
+                if (playerTurn)
+                {
+                    if (boardsToCompare[i] == boardsToCompare[boardsCount])
+                    {
+                        sameBoard++;
+                        i++;
+                    }
+                    i++;
+                }
+                else
+                {
+                    i++;
+                    if (boardsToCompare[i] == boardsToCompare[boardsCount])
+                    {
+                        sameBoard++;
+                    }
+                }
+            }
+            if (sameBoard == 3)
+                return true;
+            else
             return false;
         }
         void makeMove(Piece pieceFrom, Piece pieceTo, bool playerTurn)
@@ -305,9 +344,14 @@ namespace Chess_v3
                         ((Pawn)grid[i, j]).setIsEnPassant(false);
 
             if (pieceFrom is Pawn || pieceTo is Empty)
+            {
                 movesWhithoutCapturesOrPawns = 0;
+                boardsCount = 0;
+            }
             else
+            {
                 movesWhithoutCapturesOrPawns++;
+            }
             if (pieceFrom is Pawn)
             {
                 pawnMovement(pieceFrom, pieceTo, playerTurn);
