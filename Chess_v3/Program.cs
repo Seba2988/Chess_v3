@@ -171,21 +171,13 @@ namespace Chess_v3
         public void print()
         {
             Console.WriteLine();
-            Console.Write("    ");
-            for (int i = 0; i < letters.Length; i++)
-            {
-                Console.Write(letters[i] + "  ");
-            }
-            Console.WriteLine();
-
+            Console.WriteLine("     {0}    {1}    {2}    {3}    {4}    {5}    {6}    {7}", letters[0], letters[1], letters[2], letters[3], letters[4], letters[5], letters[6], letters[7]);
+            Console.WriteLine("   ____ ____ ____ ____ ____ ____ ____ ____");
             for (int i = 0; i < 8; i++)
             {
-                Console.Write(numbers[i] + "  ");
-                for (int j = 0; j < 8; j++)
-                {
-                    Console.Write(grid[i, j] + " ");
-                }
-                Console.WriteLine();
+                Console.WriteLine("  |    |    |    |    |    |    |    |    |");
+                Console.WriteLine("{0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} |", numbers[i], grid[i, 0], grid[i, 1], grid[i, 2], grid[i, 3], grid[i, 4], grid[i, 5], grid[i, 6], grid[i, 7]);
+                Console.WriteLine("  |____|____|____|____|____|____|____|____|");
             }
         }
         public void play()
@@ -526,11 +518,11 @@ namespace Chess_v3
             this.column = column;
             this.isWhite = isWhite;
         }
-        public virtual bool pieceIsWhite()
+        public bool pieceIsWhite()
         {
             return isWhite;
         }
-        public virtual void setPieceIsWhite(bool isWhite)
+        public void setPieceIsWhite(bool isWhite)
         {
             this.isWhite = isWhite;
         }
@@ -543,19 +535,19 @@ namespace Chess_v3
             Piece result = new Piece(row, column, isWhite);
             return result;
         }
-        public virtual int getRow()
+        public int getRow()
         {
             return row;
         }
-        public virtual void setRow(int row)
+        public void setRow(int row)
         {
             this.row = row;
         }
-        public virtual int getColumn()
+        public int getColumn()
         {
             return column;
         }
-        public virtual void setColumn(int column)
+        public void setColumn(int column)
         {
             this.column = column;
         }
