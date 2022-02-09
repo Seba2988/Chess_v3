@@ -131,7 +131,6 @@ namespace Chess_v3
                 {new Pawn(6, 0, false), new Pawn(6, 1, false), new Pawn(6, 2, false), new Pawn(6, 3, false), new Pawn(6, 4, false), new Pawn(6, 5, false), new Pawn(6, 6, false), new Pawn(6, 7, false)},
                 {new Rook(7, 0, false), new Knight(7, 1, false), new Bishop(7, 2, false), new Queen(7, 3, false), new King(7, 4, false), new Bishop(7, 5,false), new Knight(7, 6, false), new Rook(7, 7, false)}
             };
-
         }
         public Piece getDestinationPiece(int rowTo, int columnTo)
         {
@@ -213,11 +212,10 @@ namespace Chess_v3
                 print();
 
                 //win check
-                if (isCheckMate())
+                if (isCheckMate(players.getPlayerTurn()))
                 {
                     Console.WriteLine("Checkmate! " + (players.getPlayerTurn() ? "White" : "Black") + " has won!");
                     break;
-
                 }
                 //check?
                 if (isInCheck(players.getPlayerTurn() ? blackKingRow : whiteKingRow, players.getPlayerTurn() ? blackKingColumn : whiteKingColumn, players.getPlayerTurn()))
@@ -229,13 +227,12 @@ namespace Chess_v3
 
             }
         }
-
         public bool isInCheck(int kingRow, int kingColumn, bool playerTurn)
         {
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
                 {
-                    if (grid[i, j].pieceIsWhite() == playerTurn)
+                    if (grid[i, j].pieceIsWhite() == playerTurn && !(grid[i, j] is Empty))
                     {
                         if (grid[i, j].isValidMove(getDestinationPiece(kingRow, kingColumn), playerTurn, grid))
                             return true;
@@ -250,30 +247,59 @@ namespace Chess_v3
             if (isInCheck(playerTurn ? blackKingRow : whiteKingRow, playerTurn ? blackKingColumn : whiteKingColumn, playerTurn))
             {
                 playerTurn = !playerTurn;
-                undoPartialMove();
+                undoPartialMove(playerTurn);
                 return true;
             }
             playerTurn = !playerTurn;
-            undoPartialMove();
+            undoPartialMove(playerTurn);
             return false;
         }
         void makePartialMove(Piece pieceFrom, Piece pieceTo, bool playerTurn, Piece[,] grid)
         {
             partialPieceFrom = pieceFrom.copy(pieceFrom.getRow(), pieceFrom.getColumn(), playerTurn);
             partialPieceTo = pieceTo.copy(pieceTo.getRow(), pieceTo.getColumn(), !playerTurn);
+            if (pieceFrom is King)
+            {
+                if (playerTurn)
+                {
+                    whiteKingRow = pieceTo.getRow();
+                    whiteKingColumn = pieceTo.getColumn();
+                }
+                else
+                {
+                    blackKingRow = pieceTo.getRow();
+                    blackKingColumn = pieceTo.getColumn();
+                }
+            }
             grid[pieceTo.getRow(), pieceTo.getColumn()] = pieceFrom;
             grid[pieceTo.getRow(), pieceTo.getColumn()].setRow(partialPieceTo.getRow());
             grid[pieceTo.getRow(), pieceTo.getColumn()].setColumn(partialPieceTo.getColumn());
             grid[partialPieceFrom.getRow(), partialPieceFrom.getColumn()] = new Empty(partialPieceFrom.getRow(), partialPieceFrom.getColumn());
         }
-        void undoPartialMove()
+        void undoPartialMove(bool playerTurn)
         {
             grid[partialPieceFrom.getRow(), partialPieceFrom.getColumn()] = partialPieceFrom;
             grid[partialPieceTo.getRow(), partialPieceTo.getColumn()] = partialPieceTo;
+            if (partialPieceFrom is King)
+            {
+                if (playerTurn)
+                {
+                    whiteKingRow = partialPieceFrom.getRow();
+                    whiteKingColumn = partialPieceFrom.getColumn();
+                }
+                else
+                {
+                    blackKingRow = partialPieceFrom.getRow();
+                    blackKingColumn = partialPieceFrom.getColumn();
+                }
+            }
         }
-        bool isCheckMate()
+        bool isCheckMate(bool playerTurn)
         {
-            return false;
+            if (!isInCheck(playerTurn ? blackKingRow : whiteKingRow, playerTurn ? blackKingColumn : whiteKingColumn, playerTurn))
+                return false;
+            else
+                return allMovementsCheck(playerTurn);
         }
         bool isDraw(bool playerTurn)
         {
@@ -281,7 +307,7 @@ namespace Chess_v3
                 return true;
             if (threeFoldRepetition(playerTurn))
                 return true;
-            if (isStalemate())
+            if (isStalemate(playerTurn))
                 return true;
             if (isDeadPosition())
                 return true;
@@ -289,11 +315,45 @@ namespace Chess_v3
         }
         bool isDeadPosition()
         {
-            return false;
+            int bishopsCount = 0;
+            int knightsCount = 0;
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                    switch (grid[i, j].ToString())
+                    {
+                        default:
+                            return false;
+                        case "EE":
+                        case "WK":
+                        case "BK":
+                            break;
+                        case "WN":
+                        case "BN":
+                            knightsCount++;
+                            break;
+                        case "WB":
+                        case "BB":
+                            bishopsCount++;
+                            break;
+
+                    }
+            if (bishopsCount == 1 && knightsCount == 0)
+                return true;
+            else
+            if (bishopsCount == 0 && knightsCount == 1)
+                return true;
+            else
+            if (bishopsCount == 0 && knightsCount == 0)
+                return true;
+            else
+                return false;
         }
-        bool isStalemate()
+        bool isStalemate(bool playerTurn)
         {
-            return false;
+            if (isInCheck(playerTurn ? blackKingRow : whiteKingRow, playerTurn ? blackKingColumn : whiteKingColumn, playerTurn))
+                return false;
+            else
+                return allMovementsCheck(playerTurn);
         }
         bool threeFoldRepetition(bool playerTurn)
         {
@@ -305,7 +365,7 @@ namespace Chess_v3
                 }
             for (int i = 0; i <= boardsCount && sameBoard != 3; i++)
             {
-                sameBoard = 0; 
+                sameBoard = 0;
                 if (playerTurn)
                 {
                     if (boardsToCompare[i] == boardsToCompare[boardsCount])
@@ -363,12 +423,6 @@ namespace Chess_v3
             grid[toRow, toColumn].setRow(toRow);
             grid[toRow, toColumn].setColumn(toColumn);
             grid[fromRow, fromColumn] = new Empty(fromRow, fromColumn);
-
-
-
-
-
-
         }
         void pawnMovement(Piece pieceFrom, Piece pieceTo, bool playerTurn)
         {
@@ -407,7 +461,57 @@ namespace Chess_v3
         }
         void kingMovement(Piece pieceFrom, Piece pieceTo, bool playerTurn)
         {
+            ((King)pieceFrom).setHasMoved();
+            if (playerTurn)
+            {
+                whiteKingRow = pieceTo.getRow();
+                whiteKingColumn = pieceTo.getColumn();
+            }
+            else
+            {
+                blackKingRow = pieceTo.getRow();
+                blackKingColumn = pieceTo.getColumn();
 
+            }
+            if (pieceTo.getColumn() - pieceFrom.getColumn() == 2)
+            {
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() + 1] = grid[pieceFrom.getRow(), pieceFrom.getColumn() + 3];
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() + 1].setRow(pieceFrom.getRow());
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() + 1].setColumn(pieceFrom.getColumn() + 1);
+                ((Rook)grid[pieceFrom.getRow(), pieceFrom.getColumn() + 1]).setHasMoved();
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() + 3] = new Empty(pieceFrom.getRow(), pieceFrom.getColumn() + 3);
+
+            }
+            if (pieceFrom.getColumn() - pieceTo.getColumn() == 2)
+            {
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() - 1] = grid[pieceFrom.getRow(), pieceFrom.getColumn() + 4];
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() - 1].setRow(pieceFrom.getRow());
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() - 1].setColumn(pieceFrom.getColumn() - 1);
+                ((Rook)grid[pieceFrom.getRow(), pieceFrom.getColumn() - 1]).setHasMoved();
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() - 3] = new Empty(pieceFrom.getRow(), pieceFrom.getColumn() - 3);
+                grid[pieceFrom.getRow(), pieceFrom.getColumn() - 4] = new Empty(pieceFrom.getRow(), pieceFrom.getColumn() - 4);
+            }
+        }
+        bool allMovementsCheck(bool playerTurn)
+        {
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                    if (grid[i, j].pieceIsWhite() == !playerTurn && !(grid[i, j] is Empty))
+                    {
+                        for (int k = 0; k < 8; k++)
+                            for (int l = 0; l < 8; l++)
+                                if (grid[i, j].isValidMove(getDestinationPiece(k, l), !playerTurn, grid))
+                                {
+                                    if (isInCheck(playerTurn ? blackKingRow : whiteKingRow, playerTurn ? blackKingColumn : whiteKingColumn, playerTurn))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
+                                }
+                    }
+            return true;
         }
     }
     class Piece
@@ -512,20 +616,34 @@ namespace Chess_v3
 
                 if (!hasMoved)
                 {
-                    if (destinationPiece.getColumn() - getColumn() > 1 && grid[getRow(), getColumn() + 3] is Rook)
+                    if (destinationPiece.getColumn() - getColumn() == 2 && grid[getRow(), getColumn() + 3] is Rook)
                     {
+                        for (int i = 0; i < 8; i++)
+                            for (int j = 0; j < 8; j++)
+                            {
+                                if (grid[i, j].pieceIsWhite() != playerTurn && !(grid[i, j] is Empty))
+                                    if (grid[i, j].isValidMove(grid[getRow(), getColumn() + 1], !playerTurn, grid))
+                                        return false;
+                            }
                         if (((Rook)grid[getRow(), getColumn() + 3]).getHasMoved())
                             return false;
                         else
                         if (grid[getRow(), getColumn() + 1] is Empty)
                             return true;
                     }
-                    if (getColumn() - destinationPiece.getColumn() > 1 && grid[getRow(), getColumn() - 4] is Rook)
+                    if (getColumn() - destinationPiece.getColumn() == 2 && grid[getRow(), getColumn() - 4] is Rook)
                     {
+                        for (int i = 0; i < 8; i++)
+                            for (int j = 0; j < 8; j++)
+                            {
+                                if (grid[i, j].pieceIsWhite() != playerTurn)
+                                    if (grid[i, j].isValidMove(grid[getRow(), getColumn() - 1], !playerTurn, grid) || grid[i, j].isValidMove(grid[getRow(), getColumn() - 2], !playerTurn, grid))
+                                        return false;
+                            }
                         if (((Rook)grid[getRow(), getColumn() - 4]).getHasMoved())
                             return false;
                         else
-                        if (grid[getRow(), getColumn() - 1] is Empty && grid[getRow(), getColumn() - 2] is Empty)
+                        if (grid[getRow(), getColumn() - 1] is Empty && grid[getRow(), getColumn() - 3] is Empty)
                             return true;
                     }
                 }
@@ -541,7 +659,6 @@ namespace Chess_v3
             return hasMoved;
         }
     }
-
     class Queen : Piece
     {
         Bishop queenAsBishop = new Bishop(0, 0, true);
@@ -639,7 +756,7 @@ namespace Chess_v3
                     {
                         for (int j = getColumn(); j < destinationPiece.getColumn() && i > destinationPiece.getRow() + 1; j++)
                         {
-                            if (!(grid[i - 1, j + 1] is Empty))
+                            if (!(grid[i - 1, j + 1] is Empty) && grid[i - 1, j + 1] != destinationPiece)
                             {
                                 return false;
                             }
@@ -648,14 +765,14 @@ namespace Chess_v3
                     }
                     return true;
                 }
-                //rigth down move
+                //right down move
                 if (getRow() < destinationPiece.getRow() && getColumn() < destinationPiece.getColumn())
                 {
                     for (int i = getRow(); i < destinationPiece.getRow() - 1; i++)
                     {
                         for (int j = getColumn(); j < destinationPiece.getColumn() && i < destinationPiece.getRow() - 1; j++)
                         {
-                            if (!(grid[i + 1, j + 1] is Empty))
+                            if (!(grid[i + 1, j + 1] is Empty) && grid[i + 1, j + 1] != destinationPiece)
                             {
                                 return false;
                             }
@@ -671,7 +788,7 @@ namespace Chess_v3
                     {
                         for (int j = getColumn(); j > destinationPiece.getColumn() && i > destinationPiece.getRow() + 1; j--)
                         {
-                            if (!(grid[i - 1, j - 1] is Empty))
+                            if (!(grid[i - 1, j - 1] is Empty) && grid[i - 1, j - 1] != destinationPiece)
                             {
                                 return false;
                             }
@@ -687,7 +804,7 @@ namespace Chess_v3
                     {
                         for (int j = getColumn(); j > destinationPiece.getColumn() && i < destinationPiece.getRow() - 1; j--)
                         {
-                            if (!(grid[i + 1, j - 1] is Empty))
+                            if (!(grid[i + 1, j - 1] is Empty) && grid[i + 1, j - 1] != destinationPiece)
                             {
                                 return false;
                             }
@@ -803,7 +920,7 @@ namespace Chess_v3
             {
                 if (playerTurn && destinationPiece is Empty)
                 {
-                    if (destinationPiece.getRow() - getRow() > 1 && destinationPiece.getColumn() == getColumn() && grid[getRow() + 1, getColumn()] is Empty)
+                    if (destinationPiece.getRow() - getRow() == 2 && destinationPiece.getColumn() == getColumn() && grid[getRow() + 1, getColumn()] is Empty)
                     {
                         return true;
                     }
@@ -811,7 +928,7 @@ namespace Chess_v3
                 else
                 if (!playerTurn && destinationPiece is Empty)
                 {
-                    if (getRow() - destinationPiece.getRow() > 1 && destinationPiece.getColumn() == getColumn() && grid[getRow() - 1, getColumn()] is Empty)
+                    if (getRow() - destinationPiece.getRow() == 2 && destinationPiece.getColumn() == getColumn() && grid[getRow() - 1, getColumn()] is Empty)
                     {
                         return true;
                     }
