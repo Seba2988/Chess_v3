@@ -211,7 +211,6 @@ namespace Chess_v3
                 //make move and print the new board
                 makeMove(getOriginPiece(players.getFromRow(), players.getFromColumn()), getDestinationPiece(players.getToRow(), players.getToColumn()), players.getPlayerTurn());
                 print();
-                //copy board
 
                 //win check
                 if (isCheckMate())
@@ -225,7 +224,6 @@ namespace Chess_v3
                 {
                     Console.WriteLine("Check!");
                 }
-                //draw check
 
                 players.changePlayerTurn();
 
@@ -299,26 +297,20 @@ namespace Chess_v3
         }
         bool threeFoldRepetition(bool playerTurn)
         {
-            Piece[,] boardToAdd = new Piece[8, 8];
+            boardsToCompare[boardsCount] = new ChessGame();
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
                 {
-                    boardToAdd[i, j] = grid[i, j].copy(i, j, grid[i, j].pieceIsWhite());
-                }
-            for (int i = 0; i < 8; i++)
-                for (int j = 0; j < 8; j++)
-                {
-                    boardsToCompare[boardsCount] = new ChessGame();
-                    boardsToCompare[boardsCount].grid[i, j] = boardToAdd[i, j];
+                    boardsToCompare[boardsCount].grid[i, j] = grid[i, j].copy(i, j, grid[i, j].pieceIsWhite());
                 }
             for (int i = 0; i <= boardsCount && sameBoard != 3; i++)
             {
+                sameBoard = 0; 
                 if (playerTurn)
                 {
                     if (boardsToCompare[i] == boardsToCompare[boardsCount])
                     {
                         sameBoard++;
-                        i++;
                     }
                     i++;
                 }
@@ -334,7 +326,7 @@ namespace Chess_v3
             if (sameBoard == 3)
                 return true;
             else
-            return false;
+                return false;
         }
         void makeMove(Piece pieceFrom, Piece pieceTo, bool playerTurn)
         {
@@ -343,7 +335,7 @@ namespace Chess_v3
                     if (grid[i, j] is Pawn && grid[i, j].pieceIsWhite() == playerTurn)
                         ((Pawn)grid[i, j]).setIsEnPassant(false);
 
-            if (pieceFrom is Pawn || pieceTo is Empty)
+            if (pieceFrom is Pawn || !(pieceTo is Empty))
             {
                 movesWhithoutCapturesOrPawns = 0;
                 boardsCount = 0;
@@ -351,6 +343,7 @@ namespace Chess_v3
             else
             {
                 movesWhithoutCapturesOrPawns++;
+                boardsCount++;
             }
             if (pieceFrom is Pawn)
             {
@@ -644,7 +637,7 @@ namespace Chess_v3
                 {
                     for (int i = getRow(); i > destinationPiece.getRow() + 1; i--)
                     {
-                        for (int j = getColumn(); j < destinationPiece.getColumn() - 1; j++)
+                        for (int j = getColumn(); j < destinationPiece.getColumn() && i > destinationPiece.getRow() + 1; j++)
                         {
                             if (!(grid[i - 1, j + 1] is Empty))
                             {
@@ -660,7 +653,7 @@ namespace Chess_v3
                 {
                     for (int i = getRow(); i < destinationPiece.getRow() - 1; i++)
                     {
-                        for (int j = getColumn(); j < destinationPiece.getColumn() - 1; j++)
+                        for (int j = getColumn(); j < destinationPiece.getColumn() && i < destinationPiece.getRow() - 1; j++)
                         {
                             if (!(grid[i + 1, j + 1] is Empty))
                             {
@@ -676,7 +669,7 @@ namespace Chess_v3
                 {
                     for (int i = getRow(); i > destinationPiece.getRow() + 1; i--)
                     {
-                        for (int j = getColumn(); j > destinationPiece.getColumn() + 1; j--)
+                        for (int j = getColumn(); j > destinationPiece.getColumn() && i > destinationPiece.getRow() + 1; j--)
                         {
                             if (!(grid[i - 1, j - 1] is Empty))
                             {
@@ -692,7 +685,7 @@ namespace Chess_v3
                 {
                     for (int i = getRow(); i < destinationPiece.getRow() - 1; i++)
                     {
-                        for (int j = getColumn(); j > destinationPiece.getColumn() + 1; j--)
+                        for (int j = getColumn(); j > destinationPiece.getColumn() && i < destinationPiece.getRow() - 1; j--)
                         {
                             if (!(grid[i + 1, j - 1] is Empty))
                             {
