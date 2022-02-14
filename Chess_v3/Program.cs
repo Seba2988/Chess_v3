@@ -170,14 +170,13 @@ namespace Chess_v3
         }
         public void print()
         {
-            Console.WriteLine();
-            Console.WriteLine("     {0}    {1}    {2}    {3}    {4}    {5}    {6}    {7}", letters[0], letters[1], letters[2], letters[3], letters[4], letters[5], letters[6], letters[7]);
-            Console.WriteLine("   ____ ____ ____ ____ ____ ____ ____ ____");
+            Console.WriteLine("      {0}    {1}    {2}    {3}    {4}    {5}    {6}    {7}", letters[0], letters[1], letters[2], letters[3], letters[4], letters[5], letters[6], letters[7]);
+            Console.WriteLine("    ____ ____ ____ ____ ____ ____ ____ ____");
             for (int i = 0; i < 8; i++)
             {
-                Console.WriteLine("  |    |    |    |    |    |    |    |    |");
-                Console.WriteLine("{0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} |", numbers[i], grid[i, 0], grid[i, 1], grid[i, 2], grid[i, 3], grid[i, 4], grid[i, 5], grid[i, 6], grid[i, 7]);
-                Console.WriteLine("  |____|____|____|____|____|____|____|____|");
+                Console.WriteLine("   |    |    |    |    |    |    |    |    |");
+                Console.WriteLine(" {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} |", numbers[i], grid[i, 0], grid[i, 1], grid[i, 2], grid[i, 3], grid[i, 4], grid[i, 5], grid[i, 6], grid[i, 7]);
+                Console.WriteLine("   |____|____|____|____|____|____|____|____|");
             }
         }
         public void play()
@@ -362,7 +361,7 @@ namespace Chess_v3
                     {
                         default:
                             return false;
-                        case "EE":
+                        case "  ":
                         case "WK":
                         case "BK":
                             break;
@@ -537,7 +536,6 @@ namespace Chess_v3
             {
                 blackKingRow = pieceTo.getRow();
                 blackKingColumn = pieceTo.getColumn();
-
             }
             if (pieceTo.getColumn() - pieceFrom.getColumn() == 2)
             {
@@ -604,7 +602,7 @@ namespace Chess_v3
         {
             return isWhite;
         }
-        public void setPieceIsWhite(bool isWhite)
+        public virtual void setPieceIsWhite(bool isWhite)
         {
             this.isWhite = isWhite;
         }
@@ -621,7 +619,7 @@ namespace Chess_v3
         {
             return row;
         }
-        public void setRow(int row)
+        public virtual void setRow(int row)
         {
             this.row = row;
         }
@@ -629,7 +627,7 @@ namespace Chess_v3
         {
             return column;
         }
-        public void setColumn(int column)
+        public virtual void setColumn(int column)
         {
             this.column = column;
         }
@@ -639,7 +637,7 @@ namespace Chess_v3
         public Empty(int row, int column) : base(row, column, false) { }
         public override string ToString()
         {
-            return "EE";
+            return "  ";
         }
         public override bool isValidMove(Piece destinationPiece, bool playerTurn, Piece[,] grid)
         {
@@ -697,8 +695,16 @@ namespace Chess_v3
                         {
                             if (grid[i, j].pieceIsWhite() != playerTurn && !(grid[i, j] is Empty))
                             {
-                                if (grid[i, j].isValidMove(grid[getRow(), getColumn() + 1], !playerTurn, grid))
-                                    return false;
+                                if (playerTurn)
+                                {
+                                    if (grid[i, j].isValidMove(grid[0, 5], !playerTurn, grid) || grid[i, j].isValidMove(grid[0, 4], !playerTurn, grid))
+                                        return false;
+                                }
+                                else
+                                {
+                                    if (grid[i, j].isValidMove(grid[7, 5], !playerTurn, grid) || grid[i, j].isValidMove(grid[7, 4], !playerTurn, grid))
+                                        return false;
+                                }
                             }
                         }
                     }
@@ -716,8 +722,16 @@ namespace Chess_v3
                         {
                             if (grid[i, j].pieceIsWhite() != playerTurn && !(grid[i, j] is Empty))
                             {
-                                if (grid[i, j].isValidMove(grid[getRow(), getColumn() - 1], !playerTurn, grid) || grid[i, j].isValidMove(grid[getRow(), getColumn() - 2], !playerTurn, grid))
-                                    return false;
+                                if (playerTurn)
+                                {
+                                    if (grid[i, j].isValidMove(grid[0, 3], !playerTurn, grid) || grid[i, j].isValidMove(grid[0, 1], !playerTurn, grid) || grid[i, j].isValidMove(grid[0, 4], !playerTurn, grid))
+                                        return false;
+                                }
+                                else
+                                {
+                                    if (grid[i, j].isValidMove(grid[7, 3], !playerTurn, grid) || grid[i, j].isValidMove(grid[7, 1], !playerTurn, grid) || grid[i, j].isValidMove(grid[7, 4], !playerTurn, grid))
+                                        return false;
+                                }
                             }
                         }
                     }
@@ -1148,4 +1162,3 @@ namespace Chess_v3
         }
     }
 }
-
